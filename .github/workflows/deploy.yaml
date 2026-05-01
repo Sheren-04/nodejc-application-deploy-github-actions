@@ -1,0 +1,32 @@
+name: Deploy Node.js application to AWS Server
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu/nodejc-application-deploy-github-actions
+            
+            # Pull latest code
+            git pull origin master
+
+            # Stop old containers
+            docker compose down
+
+            # Rebuild & start
+            docker compose up -d --build
